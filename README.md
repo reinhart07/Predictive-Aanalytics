@@ -1,4 +1,4 @@
-# Predictive-Aanalytics
+# Predictive-Analytics
 Machine Learning Terapan1
 
 
