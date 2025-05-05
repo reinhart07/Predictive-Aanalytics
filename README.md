@@ -246,6 +246,7 @@ R² sangat berguna untuk memahami seberapa baik model dapat menjelaskan variasi 
 
 2. Root Mean Squared Error (RMSE)
 RMSE mengukur akar rata-rata dari kesalahan kuadrat antara nilai prediksi dan nilai aktual. Metrik ini memberikan bobot yang lebih tinggi pada kesalahan besar.
+
 Formula:
 
 RMSE = √(Σ(y_actual - y_predicted)² / n)
@@ -254,6 +255,7 @@ RMSE memiliki unit yang sama dengan variabel target (dollar dalam kasus ini), se
 
 3. Mean Absolute Error (MAE)
 MAE mengukur rata-rata nilai absolut dari kesalahan antara nilai prediksi dan nilai aktual.
+
 Formula:
 MAE = Σ|y_actual - y_predicted| / n
 
