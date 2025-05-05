@@ -175,7 +175,7 @@ Kekurangan:
   - Masih terbatas pada pola linear
   - Performa dapat lebih rendah untuk hubungan yang sangat non-linear
 
-3. Random Forest Regression
+## 3. Random Forest Regression
 Random Forest adalah model ensemble berbasis decision tree yang dapat menangkap pola non-linear dan interaksi kompleks antar fitur.
 Parameter:
   - n_estimators: Jumlah pohon dalam forest [50, 100]
@@ -193,7 +193,7 @@ Kekurangan:
  -  Dapat mengalami overfitting jika parameter tidak diatur dengan tepat
  -  Kurang interpretabel dibandingkan model linear
 
-4. Gradient Boosting Regression
+## 4. Gradient Boosting Regression
 Gradient Boosting adalah teknik ensemble yang membangun model secara sekuensial, dengan setiap model baru mencoba memperbaiki kesalahan model sebelumnya.
 Parameter:
  -  n_estimators: Jumlah estimator [50, 100]
