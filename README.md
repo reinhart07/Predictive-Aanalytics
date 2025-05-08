@@ -46,10 +46,24 @@ Untuk mencapai tujuan di atas, berikut adalah solusi yang diusulkan:
 
 ## Data Understanding
 
-Dataset yang digunakan dalam proyek ini adalah "Medical Cost Personal Datasets" yang berisi informasi biaya asuransi kesehatan pribadi berdasarkan karakteristik individu. Dataset ini terdiri dari 1338 sampel dengan 7 atribut. Dataset ini berasal dari buku "Machine Learning with R" karya Brett Lantz dan tersedia secara publik di Kaggle [5].
+Dataset yang digunakan dalam proyek ini adalah "Medical Cost Personal Datasets" yang berisi informasi biaya asuransi kesehatan pribadi berdasarkan karakteristik individu. Dataset ini terdiri dari 1338 sampel dengan 7 atribut. 
+**Kondisi Data**
+Dataset ini telah diperiksa untuk mengetahui kualitas dan kelengkapan datanya:
+- Missing Values**:
+Tidak ditemukan missing values pada semua kolom. Hasil dari df.isnull().sum() menunjukkan nilai 0 pada setiap kolom.
+- Duplikat:
+Tidak ditemukan data duplikat setelah menjalankan df.duplicated().sum().
+- Outlier:
+Ditemukan outlier pada variabel target charges berdasarkan metode IQR (Interquartile Range).
+Jumlah outlier: ≈139 sampel, terutama pada kelompok perokok dengan BMI tinggi.
+- Distribusi:
+Variabel target (charges) memiliki distribusi positively skewed, artinya sebagian besar biaya rendah dan hanya sebagian kecil yang sangat tinggi. Ini penting untuk diperhatikan dalam modeling karena bisa mempengaruhi akurasi.
+
+**Sumber Dataset**
+Dataset diambil dari Kaggle:
+🔗 https://www.kaggle.com/datasets/mirichoi0218/insurance
 
 Variabel-variabel pada dataset asuransi kesehatan adalah sebagai berikut:
-
 - age: Usia pemegang polis (numerik)
 - sex: Jenis kelamin pemegang polis (kategori: female/male)
 - bmi: Body Mass Index, indikator massa tubuh relatif terhadap tinggi dan berat badan (numerik)
@@ -89,24 +103,33 @@ Analisis menunjukkan interaksi yang kuat antara status merokok dan BMI. Pengaruh
 
 
 ### Data Preparation
-Tahap persiapan data merupakan langkah penting untuk memastikan data siap digunakan dalam pemodelan. Beberapa teknik persiapan data yang diterapkan dalam proyek ini:
-1. Penanganan Missing Values
-Tidak ditemukan missing values dalam dataset. Hal ini memudahkan proses analisis karena tidak perlu melakukan imputasi atau penghapusan data.
+Tahapan persiapan data dilakukan sebagai berikut:
+
+1. Pengecekan Missing Values dan Duplikat
+- Tidak ada missing values (df.isnull().sum() = 0).
+- Tidak ada duplikat (df.duplicated().sum() = 0).
+
 2. Encoding Variabel Kategorikal
-Variabel kategorikal seperti 'sex', 'smoker', dan 'region' perlu diubah menjadi bentuk numerik agar dapat diproses oleh algoritma machine learning. Metode one-hot encoding digunakan dengan pendekatan 'drop_first=True' untuk menghindari dummy variable trap.
-python.
+- Menggunakan OneHotEncoder (drop='first') untuk sex, smoker, dan region agar dapat digunakan     dalam model.
 
-Pendekatan ini dipilih karena:
-   - Mempertahankan interpretabilitas model, terutama untuk model linear
-   - Menghindari asumsi ordinal pada data kategorikal
-   - Mencegah kolinearitas sempurna dalam model regresi
+3. Standardisasi Variabel Numerik
+- Fitur numerik age, bmi, dan children distandardisasi menggunakan StandardScaler.
+- Ini penting untuk model regresi regularisasi (seperti Ridge) agar skala fitur tidak memengaruhi bobot.
 
-3. Feature Scaling
-Untuk fitur numerik seperti 'age', 'bmi', dan 'children', standarisasi dilakukan menggunakan StandardScaler. Hal ini penting terutama untuk algoritma yang sensitif terhadap skala seperti Ridge Regression.
-Standarisasi membantu:
-   - Mempercepat konvergensi algoritma
-   - Memastikan semua fitur berkontribusi secara proporsional
-   - Meningkatkan stabilitas numerik algoritma
+4. Feature Engineering
+- Ditambahkan dua fitur interaksi:
+  - bmi_smoker = BMI × smoker
+  - age_smoker = age × smoker
+- Insight ini berdasarkan EDA yang menunjukkan pengaruh kuat dari status merokok terhadap biaya.
+
+5. Transformasi Distribusi
+- Transformasi logaritmik (np.log) dilakukan pada charges untuk analisis distribusi, tapi model tetap memakai charges asli untuk interpretasi biaya.
+
+6. Outlier
+- Outlier tidak dihapus karena merepresentasikan kasus penting (seperti biaya tinggi untuk        perokok) yang relevan dalam prediksi premi asuransi.
+
+7. Pembagian Data
+   Dataset dibagi 80% untuk training dan 20% untuk testing menggunakan train_test_split.
 
 ### 4. Feature Engineering
 Beberapa fitur baru dibuat untuk meningkatkan performa model:
@@ -210,6 +233,48 @@ Kekurangan:
  -  Komputasi paling berat di antara model yang digunakan
  -  Lebih rentan terhadap overfitting
  -  Memerlukan tuning parameter yang lebih hati-hati
+
+## Model Development
+
+Model regresi yang digunakan antara lain:
+
+1. Linear Regression
+Digunakan sebagai baseline model.
+
+Tidak dilakukan tuning parameter.
+
+2. Ridge Regression
+Model regularisasi linear dengan L2 penalty.
+
+Hyperparameter alpha dituning menggunakan GridSearchCV dengan 5-fold cross-validation.
+
+Nilai yang diuji: [0.01, 0.1, 1.0, 10.0, 100.0].
+
+3. Random Forest Regressor
+Model ensemble berbasis pohon keputusan.
+
+Tuning dilakukan terhadap:
+
+n_estimators: [50, 100]
+
+max_depth: [None, 10, 20]
+
+min_samples_split: [2, 5]
+
+Tuning dilakukan menggunakan GridSearchCV dengan 3-fold CV.
+
+4. Gradient Boosting Regressor
+Model boosting yang membangun estimator secara bertahap.
+
+Parameter tuning menggunakan GridSearchCV:
+
+n_estimators: [50, 100]
+
+learning_rate: [0.01, 0.1]
+
+max_depth: [3, 5]
+
+Semua model dibungkus dalam Pipeline bersama preprocessor untuk memastikan preprocessing konsisten di setiap model.
 
 ## Hyperparameter Tuning
 Untuk meningkatkan performa model, hyperparameter tuning dilakukan menggunakan GridSearchCV dengan cross-validation. Ini membantu menemukan kombinasi parameter optimal untuk setiap algoritma.
