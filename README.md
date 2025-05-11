@@ -102,34 +102,34 @@ Beberapa insight penting dari analisis variabel kategorikal:
 Analisis menunjukkan interaksi yang kuat antara status merokok dan BMI. Pengaruh BMI terhadap biaya asuransi jauh lebih kuat pada kelompok perokok dibandingkan non-perokok.
 
 
-### Data Preparation
-Tahapan persiapan data dilakukan sebagai berikut:
+## Data Preparation
 
-1. Pengecekan Missing Values dan Duplikat
-- Tidak ada missing values (df.isnull().sum() = 0).
-- Tidak ada duplikat (df.duplicated().sum() = 0).
+Pada tahap ini, dilakukan proses pembersihan dan persiapan data agar siap digunakan dalam pemodelan machine learning. Berikut tahapan lengkapnya:
 
-2. Encoding Variabel Kategorikal
-- Menggunakan OneHotEncoder (drop='first') untuk sex, smoker, dan region agar dapat digunakan     dalam model.
+1. Menghapus Kolom Tidak Relevan
 
-3. Standardisasi Variabel Numerik
-- Fitur numerik age, bmi, dan children distandardisasi menggunakan StandardScaler.
-- Ini penting untuk model regresi regularisasi (seperti Ridge) agar skala fitur tidak memengaruhi bobot.
+- Kolom id dihapus karena tidak memiliki pengaruh terhadap target dan hanya bersifat identifier.
 
-4. Feature Engineering
-- Ditambahkan dua fitur interaksi:
-  - bmi_smoker = BMI × smoker
-  - age_smoker = age × smoker
-- Insight ini berdasarkan EDA yang menunjukkan pengaruh kuat dari status merokok terhadap biaya.
+2. Mengubah Format Tipe Data
 
-5. Transformasi Distribusi
-- Transformasi logaritmik (np.log) dilakukan pada charges untuk analisis distribusi, tapi model tetap memakai charges asli untuk interpretasi biaya.
+- Kolom bmi dan charges dipastikan memiliki tipe data float.
 
-6. Outlier
-- Outlier tidak dihapus karena merepresentasikan kasus penting (seperti biaya tinggi untuk        perokok) yang relevan dalam prediksi premi asuransi.
+- Kolom age dan children memiliki tipe data int.
 
-7. Pembagian Data
-   Dataset dibagi 80% untuk training dan 20% untuk testing menggunakan train_test_split.
+3. Mendeteksi dan Menangani Duplikasi
+
+- Data dicek untuk duplikasi, dan ditemukan 1 baris duplikat yang kemudian dihapus untuk mencegah bias pada model.
+
+4. Penanganan Data Kategori (Encoding)
+
+- Fitur kategorikal sex, smoker, dan region diubah menjadi numerik menggunakan One-Hot Encoding.
+
+- Hasilnya adalah penambahan beberapa kolom dummy seperti sex_male, smoker_yes, dll.
+
+5. Penskalaan Fitur (Feature Scaling)
+
+- Untuk meningkatkan performa model regresi, dilakukan standardisasi pada kolom numerik menggunakan StandardScaler dari sklearn.
+
 
 ### 4. Feature Engineering
 Beberapa fitur baru dibuat untuk meningkatkan performa model:
@@ -236,45 +236,21 @@ Kekurangan:
 
 ## Model Development
 
-Model regresi yang digunakan antara lain:
+1. Pemisahan Data
+- Dataset dibagi menjadi fitur (X) dan target (charges).
+- Selanjutnya, dibagi menjadi data latih dan data uji dengan rasio 80:20 menggunakan train_test_split.
 
-1. Linear Regression
-Digunakan sebagai baseline model.
+2. Training Model
+- Digunakan model Linear Regression dari sklearn.linear_model.
+- Model dilatih menggunakan data latih (X_train, y_train).
 
-Tidak dilakukan tuning parameter.
+3. Evaluasi Model
+- Dilakukan evaluasi pada data uji menggunakan metrik:
+  - MAE (Mean Absolute Error)
+  -  MSE (Mean Squared Error)
+  -  RMSE (Root Mean Squared Error)
+  -  R² Score
 
-2. Ridge Regression
-Model regularisasi linear dengan L2 penalty.
-
-Hyperparameter alpha dituning menggunakan GridSearchCV dengan 5-fold cross-validation.
-
-Nilai yang diuji: [0.01, 0.1, 1.0, 10.0, 100.0].
-
-3. Random Forest Regressor
-Model ensemble berbasis pohon keputusan.
-
-Tuning dilakukan terhadap:
-
-n_estimators: [50, 100]
-
-max_depth: [None, 10, 20]
-
-min_samples_split: [2, 5]
-
-Tuning dilakukan menggunakan GridSearchCV dengan 3-fold CV.
-
-4. Gradient Boosting Regressor
-Model boosting yang membangun estimator secara bertahap.
-
-Parameter tuning menggunakan GridSearchCV:
-
-n_estimators: [50, 100]
-
-learning_rate: [0.01, 0.1]
-
-max_depth: [3, 5]
-
-Semua model dibungkus dalam Pipeline bersama preprocessor untuk memastikan preprocessing konsisten di setiap model.
 
 ## Hyperparameter Tuning
 Untuk meningkatkan performa model, hyperparameter tuning dilakukan menggunakan GridSearchCV dengan cross-validation. Ini membantu menemukan kombinasi parameter optimal untuk setiap algoritma.
